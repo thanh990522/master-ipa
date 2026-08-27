@@ -1,0 +1,9 @@
+{
+  "name":"Master IPA Ocean",
+  "short_name":"Master IPA",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#ecfcff",
+  "theme_color":"#0877b9",
+  "description":"Interactive 44-sound English IPA pronunciation course."
+}
