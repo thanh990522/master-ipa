@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0877b9" />
-  <meta name="description" content="Master IPA Ocean — interactive 44-sound English pronunciation course with chart, audio, flashcards, practice, quiz, recording and progress tracking." />
+  <meta name="description" content="Master IPA Ocean — hệ thống học 44 âm IPA với audio, flashcard, bài luyện, quiz, ghi âm và theo dõi tiến độ." />
   <title>Master IPA Ocean — 44 English Sounds</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -110,10 +110,7 @@
           <div class="panel-top"><h3>Sound Library</h3><span id="result-count">44 sounds</span></div>
           <div id="sound-grid" class="sound-list-grid"></div>
         </aside>
-
-        <article class="sound-detail panel">
-          <div id="detail-content"></div>
-        </article>
+        <article class="sound-detail panel"><div id="detail-content"></div></article>
       </div>
     </section>
 
@@ -131,7 +128,7 @@
           <button id="flash-card" class="flash-card" type="button" aria-label="Flip flashcard">
             <div class="flash-inner">
               <div class="flash-face flash-front"><span class="tiny-label">WHAT SOUND IS THIS?</span><div id="flash-symbol" class="giant-symbol">/iː/</div><span>Tap to reveal</span></div>
-              <div class="flash-face flash-back"><span id="flash-category" class="flash-chip">Monophthong</span><h3 id="flash-keyword">sheep</h3><p id="flash-examples">green • scene • sheep</p><p id="flash-tip">Keep your lips slightly spread and the sound long.</p></div>
+              <div class="flash-face flash-back"><span id="flash-category" class="flash-chip">Monophthong</span><h3 id="flash-keyword">sheep</h3><p id="flash-examples">green • scene • sheep</p><p id="flash-tip"></p></div>
             </div>
           </button>
           <div class="flash-audio-row"><button id="flash-audio" class="circle-action" type="button">🔊</button><button id="flash-slow" class="circle-action" type="button">🐢</button></div>
@@ -183,6 +180,8 @@
   <footer><div class="shell footer-inner"><div><b>MASTER IPA OCEAN</b><span>Interactive English pronunciation practice</span></div><p>44-sound British English model • Browser-generated speech audio • Local progress storage</p></div></footer>
 
   <script src="data.js"></script>
+  <script src="vi-data.js"></script>
   <script src="app.js"></script>
+  <script src="vi-ui.js"></script>
 </body>
 </html>
