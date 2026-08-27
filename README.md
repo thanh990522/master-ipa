@@ -1,32 +1,36 @@
 # Master IPA
 
-Interactive static website for practising the standard 44-phoneme British English IPA model.
+A cartoon ocean-themed website for learning the **44 English IPA sounds**.
 
 ## Features
 
-- 12 monophthongs, 8 diphthongs, 24 consonants
+- Organized sound library with a clean, student-friendly layout
+- Soft rounded fonts using **Baloo 2** and **Nunito**
+- Ocean cartoon theme with bubbles, whale, fish, coral and shell icons
+- Audio button on **every sound card**
+- Detailed sound view with mouth-position tips
 - Common spelling patterns and example words
-- Original Vietnamese learner-error notes
-- Original shadowing sentences for every sound
-- Browser-generated English audio (Speech Synthesis API)
-- 10-round minimal-pair listening quiz
-- In-browser microphone recording for self-comparison
+- Shadowing sentence for every sound
+- Voice recording practice with microphone
+- Minimal-pair listening quiz
 - Local progress tracking with `localStorage`
 - Responsive layout for desktop, tablet and mobile
+
+## Audio
+
+Audio is generated using the browser's built-in English speech synthesis. Each IPA card has its own speaker button. The audio includes the sound cue, example words, and a short practice sentence.
 
 ## Files
 
 - `index.html` — page structure
-- `styles.css` — visual design
-- `data.js` — the 44-sound learning dataset
-- `app.js` — filtering, TTS, quiz, recording and progress logic
-
-## Run locally
-
-Open `index.html` in a modern browser. Microphone recording works best on `https://` or `localhost`.
+- `styles.css` — ocean cartoon theme
+- `data.js` — complete 44-sound IPA dataset
+- `app.js` — audio, filtering, recording, quiz and progress logic
 
 ## GitHub Pages
 
-This repository is ready to publish as a static site from the `main` branch, root folder.
+Open **Settings → Pages**, choose **Deploy from a branch**, then select **main** and **/(root)**.
 
-> Note: The implementation and teaching text in this repository are original. It does not copy proprietary audio files or reproduce the reference website's full copyrighted text.
+The public URL will be:
+
+`https://thanh990522.github.io/master-ipa/`
