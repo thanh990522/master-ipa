@@ -1,342 +1,41 @@
-(() => {
-  const sounds = window.IPA_SOUNDS || [];
-  const $ = (q, root=document) => root.querySelector(q);
-  const $$ = (q, root=document) => [...root.querySelectorAll(q)];
-  const state = {
-    current: 0,
-    studied: new Set(JSON.parse(localStorage.getItem('masterIPA_studied') || '[]')),
-    best: Number(localStorage.getItem('masterIPA_best') || 0),
-    quiz: {round:0, score:0, target:null, answered:false},
-    recorder: null,
-    chunks: [],
-    stream: null
-  };
+const soundGrid=document.getElementById('sound-grid');
+const detailContent=document.getElementById('detail-content');
+const searchInput=document.getElementById('search-input');
+const filterGroup=document.getElementById('filter-group');
+const progressChip=document.getElementById('progress-chip');
+const detailAudioBtn=document.getElementById('detail-audio-btn');
+const listenCurrentBtn=document.getElementById('listen-current-btn');
+const markLearnedBtn=document.getElementById('mark-learned-btn');
+const resetProgressBtn=document.getElementById('reset-progress-btn');
+const heroRandomBtn=document.getElementById('hero-random-btn');
+const recordBtn=document.getElementById('record-btn');
+const stopBtn=document.getElementById('stop-btn');
+const recordedAudio=document.getElementById('recorded-audio');
+const recordStatus=document.getElementById('record-status');
+const quizBox=document.getElementById('quiz-box');
+const quizScoreEl=document.getElementById('quiz-score');
+const STORAGE_KEY='masterIpaLearned';
+let currentFilter='all',currentSearch='',selectedSymbol=IPA_DATA[0]?.symbol||null;
+let learnedSet=new Set(JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'));
+let mediaRecorder=null,recordedChunks=[],quizScore=0,quizPool=[],currentQuiz=null;
 
-  const refs = {
-    tabs: $$('.tab'),
-    views: $$('.view'),
-    grid: $('#soundGrid'),
-    search: $('#search'),
-    groupFilter: $('#groupFilter'),
-    soundList: $('#soundList'),
-    statSeen: $('#statSeen'),
-    statBest: $('#statBest'),
-    trainerSymbol: $('#trainerSymbol'),
-    trainerGroup: $('#trainerGroup'),
-    trainerName: $('#trainerName'),
-    trainerSpellings: $('#trainerSpellings'),
-    trainerExamples: $('#trainerExamples'),
-    trainerTrap: $('#trainerTrap'),
-    trainerDrill: $('#trainerDrill'),
-    trainerPair: $('#trainerPair'),
-    markStudied: $('#markStudied'),
-    randomSound: $('#randomSound'),
-    playDrill: $('#playDrill'),
-    slowDrill: $('#slowDrill'),
-    goRecord: $('#goRecord'),
-    quizRound: $('#quizRound'),
-    quizBar: $('#quizBar'),
-    quizChoices: $('#quizChoices'),
-    quizFeedback: $('#quizFeedback'),
-    quizScore: $('#quizScore'),
-    playQuizWord: $('#playQuizWord'),
-    nextQuiz: $('#nextQuiz'),
-    quizCard: $('#quizCard'),
-    quizResult: $('#quizResult'),
-    finalScore: $('#finalScore'),
-    finalMessage: $('#finalMessage'),
-    restartQuiz: $('#restartQuiz'),
-    recordSound: $('#recordSound'),
-    recordSymbol: $('#recordSymbol'),
-    recordWords: $('#recordWords'),
-    recordSentence: $('#recordSentence'),
-    listenTarget: $('#listenTarget'),
-    startRecord: $('#startRecord'),
-    stopRecord: $('#stopRecord'),
-    recordStatus: $('#recordStatus'),
-    playback: $('#recordingPlayback'),
-    toast: $('#toast')
-  };
-
-  function normalize(s='') {
-    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  }
-
-  function showToast(msg) {
-    refs.toast.textContent = msg;
-    refs.toast.classList.add('show');
-    clearTimeout(showToast.t);
-    showToast.t = setTimeout(() => refs.toast.classList.remove('show'), 1700);
-  }
-
-  function saveProgress() {
-    localStorage.setItem('masterIPA_studied', JSON.stringify([...state.studied]));
-    localStorage.setItem('masterIPA_best', String(state.best));
-    updateStats();
-  }
-
-  function updateStats() {
-    refs.statSeen.textContent = state.studied.size;
-    refs.statBest.textContent = `${state.best}%`;
-  }
-
-  function voiceForEnglish() {
-    const voices = speechSynthesis.getVoices();
-    return voices.find(v => /^en-GB/i.test(v.lang)) ||
-           voices.find(v => /^en-US/i.test(v.lang)) ||
-           voices.find(v => /^en/i.test(v.lang)) ||
-           null;
-  }
-
-  function speak(text, rate=0.88) {
-    if (!('speechSynthesis' in window)) {
-      showToast('Text-to-speech is not supported in this browser.');
-      return;
-    }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = voiceForEnglish()?.lang || 'en-GB';
-    u.voice = voiceForEnglish();
-    u.rate = rate;
-    u.pitch = 1;
-    speechSynthesis.speak(u);
-  }
-
-  function switchView(view) {
-    refs.tabs.forEach(t => t.classList.toggle('active', t.dataset.view === view));
-    refs.views.forEach(v => v.classList.toggle('active', v.id === `view-${view}`));
-    if (view === 'record') syncRecordView(state.current);
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-
-  function soundCard(s, index) {
-    const studied = state.studied.has(s.symbol);
-    return `
-      <button class="sound-card" data-index="${index}">
-        <div class="top">
-          <div class="phoneme">/${s.symbol}/ ${studied ? '✓' : ''}</div>
-          <span class="group-tag">${s.group}</span>
-        </div>
-        <div class="sound-name">${s.name}</div>
-        <div class="examples">${s.examples.join(' • ')}</div>
-        <span class="mini-audio" data-speak="${s.examples[0]}">🔊 ${s.examples[0]}</span>
-      </button>`;
-  }
-
-  function renderGrid() {
-    const q = normalize(refs.search.value);
-    const group = refs.groupFilter.value;
-    const matches = sounds
-      .map((s,index)=>({s,index}))
-      .filter(({s}) => group === 'All' || s.group === group)
-      .filter(({s}) => !q || normalize([s.symbol,s.name,...s.examples,...s.spellings].join(' ')).includes(q));
-    refs.grid.innerHTML = matches.length ? matches.map(({s,index})=>soundCard(s,index)).join('') : `<div class="empty">No sounds match your search.</div>`;
-  }
-
-  function renderSoundList() {
-    refs.soundList.innerHTML = sounds.map((s,i)=>`
-      <button class="sound-chip ${i===state.current?'active':''} ${state.studied.has(s.symbol)?'studied':''}" data-index="${i}" title="${s.name}">/${s.symbol}/</button>
-    `).join('');
-  }
-
-  function renderTrainer(index) {
-    state.current = index;
-    const s = sounds[index];
-    refs.trainerSymbol.textContent = `/${s.symbol}/`;
-    refs.trainerGroup.textContent = s.group;
-    refs.trainerName.textContent = s.name;
-    refs.trainerSpellings.innerHTML = s.spellings.map(x=>`<span>${x}</span>`).join('');
-    refs.trainerExamples.innerHTML = s.examples.map(w=>`<button class="word-btn" data-word="${w}">🔊 ${w}</button>`).join('');
-    refs.trainerTrap.textContent = s.trap;
-    refs.trainerDrill.textContent = s.drill;
-    refs.trainerPair.innerHTML = `<span>${s.pair[0]}</span><b>VS</b><span>${s.pair[1]}</span>`;
-    refs.markStudied.textContent = state.studied.has(s.symbol) ? '✓ Studied' : '✓ Mark studied';
-    renderSoundList();
-  }
-
-  function selectSound(index, toTrainer=true) {
-    renderTrainer(index);
-    if (toTrainer) switchView('trainer');
-  }
-
-  function buildRecordSelect() {
-    refs.recordSound.innerHTML = sounds.map((s,i)=>`<option value="${i}">/${s.symbol}/ — ${s.name}</option>`).join('');
-  }
-
-  function syncRecordView(index) {
-    const s = sounds[index];
-    refs.recordSound.value = String(index);
-    refs.recordSymbol.textContent = `/${s.symbol}/`;
-    refs.recordWords.textContent = s.examples.join(' • ');
-    refs.recordSentence.textContent = s.drill;
-  }
-
-  function startQuiz() {
-    state.quiz = {round:0, score:0, target:null, answered:false};
-    refs.quizResult.classList.add('hidden');
-    refs.quizCard.classList.remove('hidden');
-    nextQuizRound();
-  }
-
-  function nextQuizRound() {
-    if (state.quiz.round >= 10) return finishQuiz();
-    state.quiz.round += 1;
-    state.quiz.answered = false;
-    refs.nextQuiz.disabled = true;
-    refs.quizFeedback.textContent = '';
-    refs.quizFeedback.className = 'feedback';
-    const pool = sounds.filter(s => s.pair && s.pair.length === 2);
-    const s = pool[Math.floor(Math.random()*pool.length)];
-    const target = s.pair[Math.floor(Math.random()*2)];
-    state.quiz.target = {sound:s, word:target};
-    refs.quizRound.textContent = `Round ${state.quiz.round} / 10`;
-    refs.quizBar.style.width = `${state.quiz.round*10}%`;
-    refs.quizScore.textContent = `${state.quiz.score}/${state.quiz.round-1}`;
-    const choices = Math.random() > .5 ? [...s.pair] : [s.pair[1],s.pair[0]];
-    refs.quizChoices.innerHTML = choices.map(w=>`<button class="choice" data-choice="${w}">${w}</button>`).join('');
-    setTimeout(()=>speak(target, .78), 200);
-  }
-
-  function answerQuiz(word, btn) {
-    if (state.quiz.answered) return;
-    state.quiz.answered = true;
-    const correct = word === state.quiz.target.word;
-    if (correct) {
-      state.quiz.score += 1;
-      btn.classList.add('correct');
-      refs.quizFeedback.textContent = `Correct — /${state.quiz.target.sound.symbol}/`;
-      refs.quizFeedback.classList.add('ok');
-    } else {
-      btn.classList.add('wrong');
-      $$('.choice', refs.quizChoices).find(b=>b.dataset.choice === state.quiz.target.word)?.classList.add('correct');
-      refs.quizFeedback.textContent = `It was “${state.quiz.target.word}”. Replay it and compare.`;
-      refs.quizFeedback.classList.add('bad');
-    }
-    refs.quizScore.textContent = `${state.quiz.score}/${state.quiz.round}`;
-    refs.nextQuiz.disabled = false;
-  }
-
-  function finishQuiz() {
-    const percent = state.quiz.score * 10;
-    state.best = Math.max(state.best, percent);
-    saveProgress();
-    refs.quizCard.classList.add('hidden');
-    refs.quizResult.classList.remove('hidden');
-    refs.finalScore.textContent = `${percent}%`;
-    refs.finalMessage.textContent =
-      percent >= 90 ? 'Excellent discrimination. Keep shadowing the pairs you find hardest.' :
-      percent >= 70 ? 'Good work. Repeat the missed pairs and focus on vowel length and voicing.' :
-      'Build your ear first: replay the pairs slowly, then retake the quiz.';
-  }
-
-  async function startRecording() {
-    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      refs.recordStatus.textContent = 'Recording is not supported in this browser.';
-      return;
-    }
-    try {
-      state.stream = await navigator.mediaDevices.getUserMedia({audio:true});
-      state.chunks = [];
-      state.recorder = new MediaRecorder(state.stream);
-      state.recorder.ondataavailable = e => e.data.size && state.chunks.push(e.data);
-      state.recorder.onstop = () => {
-        const blob = new Blob(state.chunks, {type: state.recorder.mimeType || 'audio/webm'});
-        const url = URL.createObjectURL(blob);
-        refs.playback.src = url;
-        refs.playback.classList.remove('hidden');
-        refs.recordStatus.textContent = 'Recording ready. Listen and compare with the model.';
-        state.stream?.getTracks().forEach(t=>t.stop());
-        state.stream = null;
-      };
-      state.recorder.start();
-      refs.startRecord.disabled = true;
-      refs.startRecord.classList.add('live');
-      refs.startRecord.textContent = '● Recording…';
-      refs.stopRecord.disabled = false;
-      refs.recordStatus.textContent = 'Recording now. Say the example words and sentence naturally.';
-    } catch (err) {
-      refs.recordStatus.textContent = 'Microphone permission was not granted.';
-    }
-  }
-
-  function stopRecording() {
-    if (state.recorder?.state === 'recording') state.recorder.stop();
-    refs.startRecord.disabled = false;
-    refs.startRecord.classList.remove('live');
-    refs.startRecord.textContent = '● Start recording';
-    refs.stopRecord.disabled = true;
-  }
-
-  refs.tabs.forEach(t => t.addEventListener('click', () => switchView(t.dataset.view)));
-  refs.search.addEventListener('input', renderGrid);
-  refs.groupFilter.addEventListener('change', renderGrid);
-
-  refs.grid.addEventListener('click', e => {
-    const speakEl = e.target.closest('[data-speak]');
-    if (speakEl) {
-      e.stopPropagation();
-      speak(speakEl.dataset.speak);
-      return;
-    }
-    const card = e.target.closest('.sound-card');
-    if (card) selectSound(Number(card.dataset.index));
-  });
-
-  refs.soundList.addEventListener('click', e => {
-    const b = e.target.closest('.sound-chip');
-    if (b) renderTrainer(Number(b.dataset.index));
-  });
-
-  refs.trainerExamples.addEventListener('click', e => {
-    const b = e.target.closest('[data-word]');
-    if (b) speak(b.dataset.word);
-  });
-
-  refs.markStudied.addEventListener('click', () => {
-    const symbol = sounds[state.current].symbol;
-    if (state.studied.has(symbol)) {
-      state.studied.delete(symbol);
-      showToast(`/${symbol}/ removed from studied.`);
-    } else {
-      state.studied.add(symbol);
-      showToast(`/${symbol}/ marked as studied.`);
-    }
-    saveProgress();
-    renderTrainer(state.current);
-    renderGrid();
-  });
-
-  refs.randomSound.addEventListener('click', () => renderTrainer(Math.floor(Math.random()*sounds.length)));
-  refs.playDrill.addEventListener('click', () => speak(sounds[state.current].drill, .84));
-  refs.slowDrill.addEventListener('click', () => speak(sounds[state.current].drill, .62));
-  refs.goRecord.addEventListener('click', () => switchView('record'));
-
-  refs.playQuizWord.addEventListener('click', () => state.quiz.target && speak(state.quiz.target.word, .72));
-  refs.quizChoices.addEventListener('click', e => {
-    const b = e.target.closest('.choice');
-    if (b) answerQuiz(b.dataset.choice, b);
-  });
-  refs.nextQuiz.addEventListener('click', nextQuizRound);
-  refs.restartQuiz.addEventListener('click', startQuiz);
-
-  refs.recordSound.addEventListener('change', () => {
-    state.current = Number(refs.recordSound.value);
-    renderTrainer(state.current);
-    syncRecordView(state.current);
-  });
-  refs.listenTarget.addEventListener('click', () => speak(sounds[Number(refs.recordSound.value)].drill, .82));
-  refs.startRecord.addEventListener('click', startRecording);
-  refs.stopRecord.addEventListener('click', stopRecording);
-
-  renderGrid();
-  renderSoundList();
-  renderTrainer(0);
-  buildRecordSelect();
-  syncRecordView(0);
-  updateStats();
-  startQuiz();
-
-  if ('speechSynthesis' in window) {
-    speechSynthesis.onvoiceschanged = () => voiceForEnglish();
-  }
-})();
+function escapeHtml(text){return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function getFilteredData(){return IPA_DATA.filter(item=>{const matchesFilter=currentFilter==='all'||item.category===currentFilter;const q=currentSearch.trim().toLowerCase();const haystack=[item.symbol,item.keyword,item.category,item.label,item.ttsText,item.mouthTip,item.commonMistake,item.practice,...item.examples,...item.spellings,...item.pair].join(' ').toLowerCase();return matchesFilter&&(!q||haystack.includes(q))})}
+function renderGrid(){const filtered=getFilteredData();if(!filtered.length){soundGrid.innerHTML='<div class="empty-state" style="grid-column:1/-1;min-height:200px"><div class="empty-icon">🐚</div><h3>No sounds found</h3><p>Try another search word or choose a different filter.</p></div>';return}if(!filtered.some(i=>i.symbol===selectedSymbol))selectedSymbol=filtered[0].symbol;soundGrid.innerHTML=filtered.map(item=>`<article class="sound-card ${item.symbol===selectedSymbol?'selected':''} ${learnedSet.has(item.symbol)?'learned':''}" data-symbol="${escapeHtml(item.symbol)}"><div class="sound-type">${escapeHtml(item.label)}</div><div class="sound-symbol">${escapeHtml(item.symbol)}</div><div class="sound-word">${escapeHtml(item.keyword)}</div><div class="sound-spelling"><strong>Spelling:</strong> ${escapeHtml(item.spellings.join(', '))}</div><div class="card-actions"><button class="small-btn" type="button" data-action="study" data-symbol="${escapeHtml(item.symbol)}">Study</button><button class="round-btn" type="button" data-action="play" data-symbol="${escapeHtml(item.symbol)}" title="Play audio">🔊</button></div></article>`).join('')}
+function renderDetail(){const item=IPA_DATA.find(s=>s.symbol===selectedSymbol);if(!item){detailContent.innerHTML='<div class="empty-state"><div class="empty-icon">🐬</div><h3>Choose a sound card</h3></div>';return}detailContent.innerHTML=`<div class="sound-hero"><div class="sound-badge">${escapeHtml(item.symbol)}</div><div class="sound-meta"><h3>${escapeHtml(item.symbol)} • ${escapeHtml(item.keyword)}</h3><p class="keyword">Main keyword: ${escapeHtml(item.keyword)}</p><div class="tag-row"><span class="tag">${escapeHtml(item.label)}</span><span class="tag">Pair: ${escapeHtml(item.pair.join(' ↔ '))}</span></div></div></div><div class="info-grid"><div class="info-card"><h4>👄 Mouth tip</h4><p>${escapeHtml(item.mouthTip)}</p></div><div class="info-card"><h4>⚠️ Common mistake</h4><p>${escapeHtml(item.commonMistake)}</p></div><div class="info-card"><h4>🔤 Common spellings</h4><ul>${item.spellings.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div class="info-card"><h4>📚 Example words</h4><ul>${item.examples.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div><div class="info-card full"><h4>🗣️ Shadowing sentence</h4><p>${escapeHtml(item.practice)}</p></div><div class="info-card full"><h4>🎧 Audio hint</h4><p>${escapeHtml(item.ttsText)}</p></div></div>`}
+function updateProgress(){progressChip.textContent=`${learnedSet.size} / ${IPA_DATA.length} learned`}
+function saveProgress(){localStorage.setItem(STORAGE_KEY,JSON.stringify([...learnedSet]));updateProgress();renderGrid()}
+function speak(text,rate=.82){if(!('speechSynthesis'in window)){alert('Speech synthesis is not supported in this browser.');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';u.rate=rate;u.pitch=1.05;const voices=speechSynthesis.getVoices();u.voice=voices.find(v=>/en-GB|English.*UK/i.test(v.lang+' '+v.name))||voices.find(v=>/en-US|English/i.test(v.lang+' '+v.name))||null;speechSynthesis.speak(u)}
+function playSound(symbol){const item=IPA_DATA.find(s=>s.symbol===symbol);if(!item)return;selectedSymbol=item.symbol;renderGrid();renderDetail();speak(`${item.ttsText} Example words: ${item.examples.join(', ')}. Repeat: ${item.practice}`)}
+function chooseSound(symbol){selectedSymbol=symbol;renderGrid();renderDetail()}
+function getSelectedItem(){return IPA_DATA.find(i=>i.symbol===selectedSymbol)||null}
+function initRecording(){if(!navigator.mediaDevices?.getUserMedia){recordStatus.textContent='Your browser does not support microphone recording.';recordBtn.disabled=true;return}recordBtn.addEventListener('click',async()=>{try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);recordedChunks=[];mediaRecorder.addEventListener('dataavailable',e=>{if(e.data.size)recordedChunks.push(e.data)});mediaRecorder.addEventListener('stop',()=>{const blob=new Blob(recordedChunks,{type:'audio/webm'});recordedAudio.src=URL.createObjectURL(blob);recordStatus.textContent='Recording complete. Listen to your voice below.';stream.getTracks().forEach(t=>t.stop())});mediaRecorder.start();recordStatus.textContent='Recording... pronounce the selected sound and sentence.';recordBtn.disabled=true;stopBtn.disabled=false}catch(e){recordStatus.textContent='Microphone permission was denied or not available.'}});stopBtn.addEventListener('click',()=>{if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();recordBtn.disabled=false;stopBtn.disabled=true}})}
+function shuffle(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]]}return c}
+function buildQuizPool(){quizPool=shuffle(IPA_DATA.filter(i=>i.pair?.length===2)).slice(0,10).map(item=>{const wrong=item.pair.find(p=>p!==item.symbol)||item.pair[1];return{prompt:`Which sound do you hear in the word "${item.keyword}"?`,listenText:`${item.ttsText} ${item.keyword}`,word:item.keyword,correct:item.symbol,options:shuffle([item.symbol,wrong])}})}
+function renderQuizStart(){quizBox.innerHTML='<p class="quiz-intro">Press start to practice listening and distinguishing similar sounds.</p><button id="start-quiz-btn" class="btn primary" type="button">Start quiz</button>';document.getElementById('start-quiz-btn').addEventListener('click',startQuiz)}
+function renderQuizQuestion(){if(!quizPool.length){quizBox.innerHTML=`<h3>🎉 Quiz finished!</h3><p class="quiz-intro">Great job. Your final score is <strong>${quizScore}</strong>.</p><button id="restart-quiz-btn" class="btn primary" type="button">Play again</button>`;document.getElementById('restart-quiz-btn').addEventListener('click',startQuiz);return}currentQuiz=quizPool.shift();quizBox.innerHTML=`<p class="quiz-intro">${escapeHtml(currentQuiz.prompt)}</p><div class="question-word">${escapeHtml(currentQuiz.word)}</div><div class="record-actions"><button id="quiz-audio-btn" class="btn secondary" type="button">🔊 Play word</button></div><div class="option-grid">${currentQuiz.options.map(o=>`<button class="option-btn" data-option="${escapeHtml(o)}" type="button">${escapeHtml(o)}</button>`).join('')}</div><p id="quiz-feedback" class="mini-note">Choose the correct IPA sound.</p>`;document.getElementById('quiz-audio-btn').addEventListener('click',()=>speak(currentQuiz.listenText));quizBox.querySelectorAll('.option-btn').forEach(btn=>btn.addEventListener('click',()=>handleQuizAnswer(btn.dataset.option,btn)))}
+function handleQuizAnswer(option,clicked){const buttons=[...quizBox.querySelectorAll('.option-btn')];buttons.forEach(b=>b.disabled=true);const feedback=document.getElementById('quiz-feedback');buttons.forEach(b=>{if(b.dataset.option===currentQuiz.correct)b.classList.add('correct');else if(b===clicked)b.classList.add('wrong')});if(option===currentQuiz.correct){quizScore++;feedback.textContent='Correct! Nice listening.'}else feedback.textContent=`Not quite. The correct sound is ${currentQuiz.correct}.`;quizScoreEl.textContent=`Score: ${quizScore}`;const n=document.createElement('button');n.className='btn primary';n.type='button';n.textContent=quizPool.length?'Next question':'See result';n.addEventListener('click',renderQuizQuestion);quizBox.appendChild(n)}
+function startQuiz(){quizScore=0;quizScoreEl.textContent='Score: 0';buildQuizPool();renderQuizQuestion()}
+function bindEvents(){searchInput.addEventListener('input',e=>{currentSearch=e.target.value;renderGrid()});filterGroup.addEventListener('click',e=>{const b=e.target.closest('.filter-btn');if(!b)return;currentFilter=b.dataset.filter;filterGroup.querySelectorAll('.filter-btn').forEach(x=>x.classList.toggle('active',x===b));renderGrid()});soundGrid.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a){a.dataset.action==='play'?playSound(a.dataset.symbol):chooseSound(a.dataset.symbol);return}const card=e.target.closest('.sound-card');if(card)chooseSound(card.dataset.symbol)});detailAudioBtn.addEventListener('click',()=>{const i=getSelectedItem();if(i)playSound(i.symbol)});listenCurrentBtn.addEventListener('click',()=>{const i=getSelectedItem();if(i)playSound(i.symbol)});markLearnedBtn.addEventListener('click',()=>{const i=getSelectedItem();if(i){learnedSet.add(i.symbol);saveProgress()}});resetProgressBtn.addEventListener('click',()=>{if(confirm('Reset all learned sound progress?')){learnedSet=new Set;saveProgress()}});heroRandomBtn.addEventListener('click',()=>{const i=IPA_DATA[Math.floor(Math.random()*IPA_DATA.length)];chooseSound(i.symbol);playSound(i.symbol);location.hash='#library'})}
+function init(){renderGrid();renderDetail();updateProgress();bindEvents();initRecording();renderQuizStart();if('speechSynthesis'in window)speechSynthesis.onvoiceschanged=()=>{}}
+init();
