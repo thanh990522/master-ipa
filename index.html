@@ -1,119 +1,187 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Master IPA Ocean</title>
-  <meta name="description" content="A cartoon ocean themed IPA learning website with audio for every sound." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0877b9" />
+  <meta name="description" content="Master IPA Ocean — interactive 44-sound English pronunciation course with chart, audio, flashcards, practice, quiz, recording and progress tracking." />
+  <title>Master IPA Ocean — 44 English Sounds</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="ocean-bg">
-    <span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span>
-    <span class="bubble b4"></span><span class="bubble b5"></span><span class="bubble b6"></span>
+  <div class="ocean-decor" aria-hidden="true">
+    <span class="bubble bubble-1"></span><span class="bubble bubble-2"></span><span class="bubble bubble-3"></span>
+    <span class="bubble bubble-4"></span><span class="bubble bubble-5"></span><span class="bubble bubble-6"></span>
+    <span class="fish fish-1">🐠</span><span class="fish fish-2">🐟</span>
   </div>
 
-  <header class="hero shell">
-    <div class="hero-text">
-      <p class="eyebrow">🌊 English Pronunciation Adventure</p>
-      <h1>Master IPA</h1>
-      <p class="subtitle">Learn all 44 English sounds with a fun cartoon ocean theme, soft fonts, clean layout, and audio for every sound.</p>
-      <div class="hero-actions">
-        <a href="#library" class="btn primary">Explore Sounds</a>
-        <button class="btn secondary" id="hero-random-btn" type="button">🎧 Random Sound</button>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card"><span class="stat-number">44</span><span class="stat-label">IPA Sounds</span></div>
-        <div class="stat-card"><span class="stat-number">20</span><span class="stat-label">Vowels</span></div>
-        <div class="stat-card"><span class="stat-number">24</span><span class="stat-label">Consonants</span></div>
-      </div>
-    </div>
-
-    <div class="hero-visual card">
-      <div class="mascot">🐳</div>
-      <h3>How to study</h3>
-      <ol>
-        <li>Choose a sound card.</li>
-        <li>Tap the speaker to hear it.</li>
-        <li>Read the mouth tip and examples.</li>
-        <li>Record yourself and compare.</li>
-      </ol>
-      <div class="hero-mini-icons"><span>🐠</span><span>🪸</span><span>🐚</span><span>⭐</span></div>
+  <header class="topbar">
+    <a class="brand" href="#chart" aria-label="Master IPA home">
+      <div class="brand-logo">/æ/</div>
+      <div><strong>MASTER IPA</strong><span>Ocean Pronunciation Adventure</span></div>
+    </a>
+    <div class="top-actions">
+      <button id="print-chart" class="icon-btn" type="button" title="Print IPA chart">🖨️</button>
+      <button id="theme-toggle" class="icon-btn" type="button" title="Toggle ocean depth">🌙</button>
+      <button id="sound-settings" class="icon-btn" type="button" title="Audio settings">🎚️</button>
     </div>
   </header>
 
-  <main class="shell main-layout">
-    <section class="panel controls-panel" id="library">
-      <div class="panel-head">
-        <div><p class="section-kicker">🔎 Sound Library</p><h2>Find the sound you need</h2></div>
-        <div class="progress-chip" id="progress-chip">0 / 44 learned</div>
+  <section class="hero shell">
+    <div class="hero-copy">
+      <div class="hero-tag">🌊 44 English Sounds • Listen • Repeat • Master</div>
+      <h1>Explore English pronunciation<br><span>under the sea.</span></h1>
+      <p>Study the full IPA sound system with audio, mouth tips, minimal pairs, flashcards, quizzes and self-recording — all in one playful learning space.</p>
+      <div class="hero-buttons">
+        <button class="btn primary" data-go="chart" type="button">🔤 Open IPA Chart</button>
+        <button id="random-hero" class="btn secondary" type="button">🎲 Random Sound</button>
+      </div>
+      <div class="hero-stats">
+        <div><b>44</b><span>sounds</span></div>
+        <div><b id="hero-learned">0</b><span>learned</span></div>
+        <div><b id="hero-best">0%</b><span>best score</span></div>
+        <div><b id="hero-streak">0</b><span>day streak</span></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="whale">🐳</div>
+      <h2>Your 5-step dive plan</h2>
+      <div class="steps">
+        <div><span>1</span><p><b>See</b> the IPA symbol.</p></div>
+        <div><span>2</span><p><b>Hear</b> the sound and word.</p></div>
+        <div><span>3</span><p><b>Shape</b> your mouth correctly.</p></div>
+        <div><span>4</span><p><b>Repeat</b> and record yourself.</p></div>
+        <div><span>5</span><p><b>Test</b> with listening practice.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="course-nav shell" aria-label="Course sections">
+    <button class="nav-tab active" data-view="chart" type="button">🔤 <span>IPA Chart</span></button>
+    <button class="nav-tab" data-view="learn" type="button">🐬 <span>Learn</span></button>
+    <button class="nav-tab" data-view="flashcards" type="button">🃏 <span>Flashcards</span></button>
+    <button class="nav-tab" data-view="practice" type="button">🎧 <span>Practice</span></button>
+    <button class="nav-tab" data-view="quiz" type="button">🧠 <span>Quiz</span></button>
+    <button class="nav-tab" data-view="progress" type="button">🏆 <span>Progress</span></button>
+  </nav>
+
+  <main class="shell">
+    <section id="view-chart" class="view active">
+      <div class="section-title">
+        <div><span class="kicker">START HERE</span><h2>The 44-Sound Phonemic Chart</h2><p>Tap any sound to hear it. Tap <b>Study</b> to open the full pronunciation guide.</p></div>
+        <div class="chart-key"><span><i class="key-dot mono"></i>12 monophthongs</span><span><i class="key-dot diph"></i>8 diphthongs</span><span><i class="key-dot cons"></i>24 consonants</span></div>
       </div>
 
-      <div class="toolbar">
-        <div class="search-box"><span>🔍</span><input id="search-input" type="text" placeholder="Search symbol, word, or spelling..." /></div>
-        <div class="filter-group" id="filter-group">
-          <button class="filter-btn active" data-filter="all" type="button">All</button>
-          <button class="filter-btn" data-filter="monophthong" type="button">Monophthongs</button>
-          <button class="filter-btn" data-filter="diphthong" type="button">Diphthongs</button>
-          <button class="filter-btn" data-filter="consonant" type="button">Consonants</button>
-        </div>
-      </div>
+      <article class="chart-section vowel-zone">
+        <div class="zone-head"><div><span class="zone-icon">🐚</span><h3>Vowels</h3></div><p>Air flows freely. Focus on tongue position, lip shape and length.</p></div>
+        <h4 class="chart-subtitle">Monophthongs — one steady vowel sound</h4>
+        <div id="mono-chart" class="phoneme-chart mono-chart"></div>
+        <h4 class="chart-subtitle">Diphthongs — glide from one vowel position to another</h4>
+        <div id="diph-chart" class="phoneme-chart diph-chart"></div>
+      </article>
 
-      <div class="legend-row">
-        <span class="legend-item"><i class="dot monophthong"></i> Monophthong</span>
-        <span class="legend-item"><i class="dot diphthong"></i> Diphthong</span>
-        <span class="legend-item"><i class="dot consonant"></i> Consonant</span>
-      </div>
-      <div id="sound-grid" class="sound-grid"></div>
+      <article class="chart-section consonant-zone">
+        <div class="zone-head"><div><span class="zone-icon">🪸</span><h3>Consonants</h3></div><p>Air is blocked or narrowed. Learn voiced and unvoiced partners together.</p></div>
+        <div id="consonant-chart" class="consonant-groups"></div>
+      </article>
     </section>
 
-    <section class="detail-grid">
-      <section class="panel detail-panel">
-        <div class="panel-head">
-          <div><p class="section-kicker">🫧 Sound Detail</p><h2>Study one sound deeply</h2></div>
-          <button id="detail-audio-btn" class="round-btn" type="button" title="Play sound">🔊</button>
-        </div>
-        <div id="detail-content" class="detail-content"></div>
-      </section>
-
-      <section class="panel tools-panel">
-        <div class="panel-head"><div><p class="section-kicker">🎙️ Practice Tools</p><h2>Listen, repeat, and check</h2></div></div>
-        <div class="tool-stack">
-          <div class="tool-card highlight">
-            <h3>Quick listen</h3><p>Hear the currently selected sound and its keyword.</p>
-            <button id="listen-current-btn" class="btn primary full" type="button">Play current sound</button>
+    <section id="view-learn" class="view">
+      <div class="section-title split-title">
+        <div><span class="kicker">DEEP DIVE</span><h2>Learn Every Sound</h2><p>Search, filter, listen and study one sound at a time.</p></div>
+        <div class="learn-tools">
+          <label class="search-wrap">🔎<input id="search-input" type="search" placeholder="Search IPA, keyword or spelling…" /></label>
+          <div id="filter-group" class="filter-row">
+            <button class="pill active" data-filter="all" type="button">All</button>
+            <button class="pill" data-filter="monophthong" type="button">Monophthongs</button>
+            <button class="pill" data-filter="diphthong" type="button">Diphthongs</button>
+            <button class="pill" data-filter="consonant" type="button">Consonants</button>
+            <button class="pill" data-filter="difficult" type="button">⭐ Difficult</button>
           </div>
-          <div class="tool-card">
-            <h3>Voice recording</h3><p>Record your voice, stop, and play it back to compare with the model.</p>
-            <div class="record-actions">
-              <button id="record-btn" class="btn secondary" type="button">⏺️ Start recording</button>
-              <button id="stop-btn" class="btn ghost" type="button" disabled>⏹️ Stop</button>
+        </div>
+      </div>
+
+      <div class="learn-layout">
+        <aside class="sound-browser panel">
+          <div class="panel-top"><h3>Sound Library</h3><span id="result-count">44 sounds</span></div>
+          <div id="sound-grid" class="sound-list-grid"></div>
+        </aside>
+
+        <article class="sound-detail panel">
+          <div id="detail-content"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="view-flashcards" class="view">
+      <div class="section-title"><div><span class="kicker">MEMORY TRAINING</span><h2>IPA Flashcards</h2><p>Flip the card, listen, then decide whether you know the sound.</p></div><div class="progress-pill"><span id="flash-index">1 / 44</span></div></div>
+      <div class="flash-layout">
+        <aside class="flash-options panel">
+          <h3>Deck Settings</h3>
+          <label>Deck<select id="flash-deck"><option value="all">All 44 sounds</option><option value="monophthong">Monophthongs</option><option value="diphthong">Diphthongs</option><option value="consonant">Consonants</option><option value="difficult">Difficult sounds</option></select></label>
+          <label class="toggle-row"><input id="flash-shuffle" type="checkbox" checked /><span>Shuffle deck</span></label>
+          <button id="restart-flash" class="btn secondary full" type="button">🔄 Restart deck</button>
+          <div class="keyboard-tip">⌨️ <b>Keyboard:</b><br>Space = flip • ←/→ = change card • A = audio</div>
+        </aside>
+        <div class="flash-stage">
+          <button id="flash-card" class="flash-card" type="button" aria-label="Flip flashcard">
+            <div class="flash-inner">
+              <div class="flash-face flash-front"><span class="tiny-label">WHAT SOUND IS THIS?</span><div id="flash-symbol" class="giant-symbol">/iː/</div><span>Tap to reveal</span></div>
+              <div class="flash-face flash-back"><span id="flash-category" class="flash-chip">Monophthong</span><h3 id="flash-keyword">sheep</h3><p id="flash-examples">green • scene • sheep</p><p id="flash-tip">Keep your lips slightly spread and the sound long.</p></div>
             </div>
-            <audio id="recorded-audio" controls></audio>
-            <p id="record-status" class="mini-note">Microphone practice ready.</p>
-          </div>
-          <div class="tool-card">
-            <h3>Study progress</h3><p>Mark sounds as learned and keep your progress in this browser.</p>
-            <button id="mark-learned-btn" class="btn accent full" type="button">✅ Mark current as learned</button>
-            <button id="reset-progress-btn" class="btn ghost full" type="button">Reset progress</button>
-          </div>
+          </button>
+          <div class="flash-audio-row"><button id="flash-audio" class="circle-action" type="button">🔊</button><button id="flash-slow" class="circle-action" type="button">🐢</button></div>
+          <div class="flash-controls"><button id="flash-prev" class="btn secondary" type="button">← Previous</button><button id="flash-hard" class="btn coral" type="button">⭐ Difficult</button><button id="flash-known" class="btn mint" type="button">✓ I know this</button><button id="flash-next" class="btn primary" type="button">Next →</button></div>
         </div>
-      </section>
+      </div>
     </section>
 
-    <section class="panel quiz-panel">
-      <div class="panel-head">
-        <div><p class="section-kicker">🦀 Quick Challenge</p><h2>Minimal pair quiz</h2></div>
-        <div class="score-badge" id="quiz-score">Score: 0</div>
+    <section id="view-practice" class="view">
+      <div class="section-title"><div><span class="kicker">ACTIVE PRACTICE</span><h2>Listen • Speak • Type</h2><p>Use three different modes so you do not only memorize the chart visually.</p></div></div>
+      <div class="practice-tabs" id="practice-tabs">
+        <button class="practice-tab active" data-practice="listen" type="button">🎧 Listen & Choose</button>
+        <button class="practice-tab" data-practice="dictation" type="button">⌨️ Hear & Type</button>
+        <button class="practice-tab" data-practice="record" type="button">🎙️ Record & Compare</button>
       </div>
-      <div id="quiz-box" class="quiz-box"></div>
+      <div id="practice-listen" class="practice-view active panel practice-panel"></div>
+      <div id="practice-dictation" class="practice-view panel practice-panel"></div>
+      <div id="practice-record" class="practice-view panel practice-panel"></div>
+    </section>
+
+    <section id="view-quiz" class="view">
+      <div class="section-title"><div><span class="kicker">FINAL CHECK</span><h2>20-Question IPA Challenge</h2><p>A mixed quiz covering sound recognition, minimal pairs and spelling patterns.</p></div><div class="score-card-mini"><span>Current</span><b id="quiz-score">0 / 0</b></div></div>
+      <div id="quiz-box" class="panel quiz-panel"></div>
+    </section>
+
+    <section id="view-progress" class="view">
+      <div class="section-title"><div><span class="kicker">YOUR JOURNEY</span><h2>Progress Dashboard</h2><p>Your learning data is stored locally in this browser.</p></div><button id="reset-all" class="btn danger-outline" type="button">Reset all progress</button></div>
+      <div class="dashboard-grid">
+        <article class="dash-card"><span class="dash-icon">🐳</span><div><b id="dash-learned">0</b><span>Sounds learned</span></div></article>
+        <article class="dash-card"><span class="dash-icon">⭐</span><div><b id="dash-difficult">0</b><span>Difficult sounds</span></div></article>
+        <article class="dash-card"><span class="dash-icon">🏆</span><div><b id="dash-best">0%</b><span>Best quiz</span></div></article>
+        <article class="dash-card"><span class="dash-icon">🔥</span><div><b id="dash-streak">0</b><span>Day streak</span></div></article>
+      </div>
+      <div class="progress-panels">
+        <article class="panel"><div class="panel-top"><h3>Completion by group</h3><span id="overall-progress">0%</span></div><div id="group-progress" class="group-progress"></div></article>
+        <article class="panel"><div class="panel-top"><h3>Focus next</h3><span>⭐ Difficult</span></div><div id="difficult-list" class="focus-list"></div></article>
+      </div>
     </section>
   </main>
 
-  <footer class="shell footer"><p>Made for pronunciation practice • Ocean cartoon theme • Audio on every sound</p></footer>
+  <div id="audio-settings-panel" class="settings-popover hidden">
+    <div class="popover-head"><h3>Audio Settings</h3><button id="close-settings" type="button">✕</button></div>
+    <label>Voice<select id="voice-select"></select></label>
+    <label>Speed<input id="rate-range" type="range" min="0.55" max="1.15" step="0.05" value="0.82" /><span id="rate-value">0.82×</span></label>
+    <label class="toggle-row"><input id="auto-audio" type="checkbox" /><span>Auto-play when selecting a sound</span></label>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <footer><div class="shell footer-inner"><div><b>MASTER IPA OCEAN</b><span>Interactive English pronunciation practice</span></div><p>44-sound British English model • Browser-generated speech audio • Local progress storage</p></div></footer>
+
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
