@@ -1,209 +1,119 @@
-<!doctype html>
-<html lang="vi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0f4c81" />
-  <meta name="description" content="Master IPA - interactive practice for 44 English phonemes, minimal pairs, shadowing and self-recording." />
-  <title>Master IPA — 44 English Sounds</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Master IPA Ocean</title>
+  <meta name="description" content="A cartoon ocean themed IPA learning website with audio for every sound." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="sky">
-    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+  <div class="ocean-bg">
+    <span class="bubble b1"></span><span class="bubble b2"></span><span class="bubble b3"></span>
+    <span class="bubble b4"></span><span class="bubble b5"></span><span class="bubble b6"></span>
   </div>
 
-  <header class="hero">
-    <div class="brand">
-      <div class="brand-mark">/æ/</div>
-      <div>
-        <div class="eyebrow">INTERACTIVE PRONUNCIATION LAB</div>
-        <h1>MASTER IPA</h1>
-        <p>44 English sounds • traps for Vietnamese learners • listening • shadowing</p>
+  <header class="hero shell">
+    <div class="hero-text">
+      <p class="eyebrow">🌊 English Pronunciation Adventure</p>
+      <h1>Master IPA</h1>
+      <p class="subtitle">Learn all 44 English sounds with a fun cartoon ocean theme, soft fonts, clean layout, and audio for every sound.</p>
+      <div class="hero-actions">
+        <a href="#library" class="btn primary">Explore Sounds</a>
+        <button class="btn secondary" id="hero-random-btn" type="button">🎧 Random Sound</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><span class="stat-number">44</span><span class="stat-label">IPA Sounds</span></div>
+        <div class="stat-card"><span class="stat-number">20</span><span class="stat-label">Vowels</span></div>
+        <div class="stat-card"><span class="stat-number">24</span><span class="stat-label">Consonants</span></div>
       </div>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><b id="statSounds">44</b><span>sounds</span></div>
-      <div class="stat"><b id="statSeen">0</b><span>studied</span></div>
-      <div class="stat"><b id="statBest">0%</b><span>best quiz</span></div>
+
+    <div class="hero-visual card">
+      <div class="mascot">🐳</div>
+      <h3>How to study</h3>
+      <ol>
+        <li>Choose a sound card.</li>
+        <li>Tap the speaker to hear it.</li>
+        <li>Read the mouth tip and examples.</li>
+        <li>Record yourself and compare.</li>
+      </ol>
+      <div class="hero-mini-icons"><span>🐠</span><span>🪸</span><span>🐚</span><span>⭐</span></div>
     </div>
   </header>
 
-  <main class="shell">
-    <nav class="tabs" aria-label="Main sections">
-      <button class="tab active" data-view="chart">🔤 IPA Chart</button>
-      <button class="tab" data-view="trainer">🎧 Sound Trainer</button>
-      <button class="tab" data-view="quiz">🧠 Minimal Pairs</button>
-      <button class="tab" data-view="record">🎙️ Shadow & Record</button>
-    </nav>
+  <main class="shell main-layout">
+    <section class="panel controls-panel" id="library">
+      <div class="panel-head">
+        <div><p class="section-kicker">🔎 Sound Library</p><h2>Find the sound you need</h2></div>
+        <div class="progress-chip" id="progress-chip">0 / 44 learned</div>
+      </div>
 
-    <section id="view-chart" class="view active">
-      <div class="section-head">
-        <div>
-          <span class="kicker">START HERE</span>
-          <h2>Explore all 44 sounds</h2>
-          <p>Chọn một âm để xem cách viết thường gặp, từ ví dụ, lỗi người Việt hay gặp và câu luyện.</p>
-        </div>
-        <div class="filters">
-          <input id="search" type="search" placeholder="Search sound or example…" aria-label="Search sounds" />
-          <select id="groupFilter" aria-label="Filter by sound group">
-            <option value="All">All groups</option>
-            <option value="Monophthongs">Monophthongs</option>
-            <option value="Diphthongs">Diphthongs</option>
-            <option value="Consonants">Consonants</option>
-          </select>
+      <div class="toolbar">
+        <div class="search-box"><span>🔍</span><input id="search-input" type="text" placeholder="Search symbol, word, or spelling..." /></div>
+        <div class="filter-group" id="filter-group">
+          <button class="filter-btn active" data-filter="all" type="button">All</button>
+          <button class="filter-btn" data-filter="monophthong" type="button">Monophthongs</button>
+          <button class="filter-btn" data-filter="diphthong" type="button">Diphthongs</button>
+          <button class="filter-btn" data-filter="consonant" type="button">Consonants</button>
         </div>
       </div>
 
-      <div class="legend">
-        <span><i class="dot mono"></i>12 monophthongs</span>
-        <span><i class="dot diph"></i>8 diphthongs</span>
-        <span><i class="dot cons"></i>24 consonants</span>
+      <div class="legend-row">
+        <span class="legend-item"><i class="dot monophthong"></i> Monophthong</span>
+        <span class="legend-item"><i class="dot diphthong"></i> Diphthong</span>
+        <span class="legend-item"><i class="dot consonant"></i> Consonant</span>
       </div>
-
-      <div id="soundGrid" class="sound-grid"></div>
+      <div id="sound-grid" class="sound-grid"></div>
     </section>
 
-    <section id="view-trainer" class="view">
-      <div class="trainer-layout">
-        <aside class="sound-list-panel">
-          <div class="panel-title">
-            <span>44 sounds</span>
-            <button id="randomSound" class="mini-btn" title="Random sound">🎲</button>
-          </div>
-          <div id="soundList" class="sound-list"></div>
-        </aside>
+    <section class="detail-grid">
+      <section class="panel detail-panel">
+        <div class="panel-head">
+          <div><p class="section-kicker">🫧 Sound Detail</p><h2>Study one sound deeply</h2></div>
+          <button id="detail-audio-btn" class="round-btn" type="button" title="Play sound">🔊</button>
+        </div>
+        <div id="detail-content" class="detail-content"></div>
+      </section>
 
-        <article class="trainer-card">
-          <div class="trainer-top">
-            <div id="trainerSymbol" class="big-symbol">/iː/</div>
-            <div>
-              <span id="trainerGroup" class="badge">Monophthongs</span>
-              <h2 id="trainerName">long ee</h2>
+      <section class="panel tools-panel">
+        <div class="panel-head"><div><p class="section-kicker">🎙️ Practice Tools</p><h2>Listen, repeat, and check</h2></div></div>
+        <div class="tool-stack">
+          <div class="tool-card highlight">
+            <h3>Quick listen</h3><p>Hear the currently selected sound and its keyword.</p>
+            <button id="listen-current-btn" class="btn primary full" type="button">Play current sound</button>
+          </div>
+          <div class="tool-card">
+            <h3>Voice recording</h3><p>Record your voice, stop, and play it back to compare with the model.</p>
+            <div class="record-actions">
+              <button id="record-btn" class="btn secondary" type="button">⏺️ Start recording</button>
+              <button id="stop-btn" class="btn ghost" type="button" disabled>⏹️ Stop</button>
             </div>
-            <button id="markStudied" class="primary small">✓ Mark studied</button>
+            <audio id="recorded-audio" controls></audio>
+            <p id="record-status" class="mini-note">Microphone practice ready.</p>
           </div>
-
-          <div class="info-grid">
-            <div class="info-box">
-              <span class="label">COMMON SPELLINGS</span>
-              <div id="trainerSpellings" class="chips"></div>
-            </div>
-            <div class="info-box">
-              <span class="label">EXAMPLES</span>
-              <div id="trainerExamples" class="word-audio-row"></div>
-            </div>
+          <div class="tool-card">
+            <h3>Study progress</h3><p>Mark sounds as learned and keep your progress in this browser.</p>
+            <button id="mark-learned-btn" class="btn accent full" type="button">✅ Mark current as learned</button>
+            <button id="reset-progress-btn" class="btn ghost full" type="button">Reset progress</button>
           </div>
-
-          <div class="trap-box">
-            <div class="trap-icon">⚠️</div>
-            <div>
-              <span class="label">VIETNAMESE LEARNER TRAP</span>
-              <p id="trainerTrap"></p>
-            </div>
-          </div>
-
-          <div class="drill-box">
-            <span class="label">SHADOWING SENTENCE</span>
-            <p id="trainerDrill" class="drill"></p>
-            <div class="actions">
-              <button id="playDrill" class="primary">🔊 Listen</button>
-              <button id="slowDrill" class="secondary">🐢 Slow</button>
-              <button id="goRecord" class="secondary">🎙️ Record yourself</button>
-            </div>
-          </div>
-
-          <div class="pair-box">
-            <span class="label">MINIMAL-PAIR FOCUS</span>
-            <div id="trainerPair" class="pair-preview"></div>
-          </div>
-
-          <p class="source-note">Audio on this site is generated by your browser's English text-to-speech voice; no audio file from the reference website is copied.</p>
-        </article>
-      </div>
+        </div>
+      </section>
     </section>
 
-    <section id="view-quiz" class="view">
-      <div class="quiz-wrap">
-        <div class="quiz-header">
-          <div>
-            <span class="kicker">LISTEN FIRST</span>
-            <h2>Minimal Pair Challenge</h2>
-            <p>Nghe một từ rồi chọn đáp án. Mục tiêu: nghe ra sự khác biệt trước khi cố phát âm.</p>
-          </div>
-          <div class="score-pill"><span>Score</span><b id="quizScore">0/0</b></div>
-        </div>
-
-        <div id="quizCard" class="quiz-card">
-          <div class="quiz-progress"><div id="quizBar"></div></div>
-          <div class="quiz-round" id="quizRound">Round 1 / 10</div>
-          <div class="listen-orb">🎧</div>
-          <h3>Which word did you hear?</h3>
-          <button id="playQuizWord" class="primary big">▶ Play word</button>
-          <div id="quizChoices" class="quiz-choices"></div>
-          <div id="quizFeedback" class="feedback" aria-live="polite"></div>
-          <button id="nextQuiz" class="secondary next" disabled>Next →</button>
-        </div>
-
-        <div id="quizResult" class="result-card hidden">
-          <div class="result-emoji">🏆</div>
-          <h3>Quiz complete</h3>
-          <div id="finalScore" class="final-score">0%</div>
-          <p id="finalMessage"></p>
-          <button id="restartQuiz" class="primary">Try again</button>
-        </div>
+    <section class="panel quiz-panel">
+      <div class="panel-head">
+        <div><p class="section-kicker">🦀 Quick Challenge</p><h2>Minimal pair quiz</h2></div>
+        <div class="score-badge" id="quiz-score">Score: 0</div>
       </div>
-    </section>
-
-    <section id="view-record" class="view">
-      <div class="record-grid">
-        <article class="record-card">
-          <span class="kicker">SHADOW</span>
-          <h2>Listen → imitate → compare</h2>
-          <p>Chọn một âm. Nghe câu mẫu, ghi âm lại giọng của bạn, rồi nghe hai bản liên tiếp để tự so sánh.</p>
-
-          <label class="select-label" for="recordSound">Target sound</label>
-          <select id="recordSound"></select>
-
-          <div class="record-target">
-            <div id="recordSymbol" class="record-symbol">/iː/</div>
-            <div>
-              <div id="recordWords" class="record-words"></div>
-              <p id="recordSentence"></p>
-            </div>
-          </div>
-
-          <div class="actions wrap">
-            <button id="listenTarget" class="primary">🔊 Model</button>
-            <button id="startRecord" class="record-btn">● Start recording</button>
-            <button id="stopRecord" class="secondary" disabled>■ Stop</button>
-          </div>
-
-          <div id="recordStatus" class="record-status">Microphone is idle.</div>
-          <audio id="recordingPlayback" controls class="playback hidden"></audio>
-        </article>
-
-        <aside class="tips-card">
-          <span class="kicker">SELF-CHECK</span>
-          <h3>4 things to listen for</h3>
-          <ol>
-            <li><b>Length</b><span>Âm dài/ngắn có đúng không?</span></li>
-            <li><b>Voice</b><span>Có rung hay không rung đúng chỗ?</span></li>
-            <li><b>Ending</b><span>Phụ âm cuối có bị nuốt không?</span></li>
-            <li><b>Flow</b><span>Có thêm nguyên âm “ơ” sau phụ âm không?</span></li>
-          </ol>
-          <div class="privacy-note">🔒 Bản ghi chỉ nằm trong trình duyệt hiện tại và không được tải lên máy chủ.</div>
-        </aside>
-      </div>
+      <div id="quiz-box" class="quiz-box"></div>
     </section>
   </main>
 
-  <div id="toast" class="toast" role="status"></div>
-
-  <footer>
-    <p><b>Master IPA</b> — an original learning implementation built around the standard 44-phoneme British English model.</p>
-  </footer>
-
+  <footer class="shell footer"><p>Made for pronunciation practice • Ocean cartoon theme • Audio on every sound</p></footer>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
